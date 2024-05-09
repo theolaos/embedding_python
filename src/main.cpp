@@ -4,6 +4,7 @@
 #define PY_SSIZE_T_CLEAN
 
 int main(int argc, char *argv[]){
+    // On release
     setenv("PYTHONPATH",".",1);
 
     std::cout << "Hello C++" << std::endl;
@@ -19,54 +20,56 @@ int main(int argc, char *argv[]){
 
     Py_Initialize();
 
+    PyObject* module = PyImport_ImportModule("resources.simple");
 
-    PyObject* simple_gaem_name = PyUnicode_FromString((char*)"resources.simple");
-    PyObject* module_name = PyImport_Import(simple_gaem_name);
 
-    if (module_name == NULL){
-        std::cerr << "Module resources simple, not found." << std::endl;
-        return -1;
-    }
-    
+    if (module != NULL) {
+        // Assuming your Game class is defined in your Python module
+        PyObject* game_class = PyObject_GetAttrString(module, "Game");
 
-    PyObject* myClass = PyObject_GetAttrString(module_name,"Game");
+        if (game_class && PyCallable_Check(game_class)) {
+            // Create an instance of the Game class
+            PyObject* game_instance = PyObject_CallObject(game_class, NULL);
 
-    PyObject* gameClass = PyObject_CallObject(myClass, NULL);
+            if (game_instance != NULL) {
+                // Call the setup() method
+                PyObject_CallMethod(game_instance, "setup", NULL);
 
-    PyObject* gameSetup = PyObject_CallMethod(gameClass,(char *)"setup","s",gameClass); 
-    if (gameSetup == NULL){
-        std::cerr << "Game setup not initialized" << std::endl;
-        return -1;
-    }
-    PyObject* gameLoop = PyObject_CallMethod(gameClass,(char *)"game_loop","s",gameClass);
-    if (gameLoop == NULL){
-        std::cerr << "game loop not initialized" << std::endl;
-        return -1;
-    }
+                // Game loop
+                while (true) {
+                    // Call the game_loop() method
+                    PyObject_CallMethod(game_instance, "game_loop", NULL);
 
-    static bool running = true;
-    while (running){
-        gameLoop = PyObject_CallMethod(gameClass,(char *)"game_loop","s",gameClass);
-        running = PyObject_CallMethod(gameClass,(char *)"get_false","s",gameClass);
-        if (running == NULL){
-            std::cerr << "running not initialized" << std::endl;
-            return -1;
+                    // Check if the game is still running
+                    PyObject* running_state = PyObject_CallMethod(game_instance, "get_running_state", NULL);
+                    bool running = (bool*)PyObject_IsTrue(running_state);
+
+                    // Clean up
+                    Py_DECREF(running_state);
+
+                    if (!running)
+                        break;
+
+                    // Insert a delay or handle other tasks here
+                }
+
+                // Clean up
+                Py_DECREF(game_instance);
+            }
+
+            Py_DECREF(game_class);
         }
+
+        Py_DECREF(module);
     }
-
-
-    Py_DECREF(simple_gaem_name);
-    Py_DECREF(gameClass);
-    Py_DECREF(gameLoop);
-    Py_DECREF(gameSetup);
-    Py_DECREF(myClass);
-
-    if (Py_FinalizeEx() < 0 ){
-        exit(120);
-    }
-
 
     PyMem_RawFree(program);
 
+    // Finalize Python
+    Py_Finalize();
+
     return 0;
 }
+
+
+

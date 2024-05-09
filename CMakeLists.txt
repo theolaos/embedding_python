@@ -9,8 +9,11 @@ set(LIBPYTHON_PATH "/usr/lib64/libpython3.12.so")
 # Find all your source files
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
+configure_file("resources/simple.py" "${CMAKE_CURRENT_BINARY_DIR}/resources/simple.py" COPYONLY)
+
 # Create your executable
 add_executable(${CMAKE_PROJECT_NAME} ${MY_SOURCES})
+
 
 # Set C++ standard
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 17)

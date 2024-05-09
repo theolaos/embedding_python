@@ -31,13 +31,14 @@ class Game:
         self.clock = None
         self.running = None
     
-    def setup(self) -> None:
+    def setup(self) -> int:
         self.screen = pygame.display.set_mode((1280, 720))
         self.clock = pygame.time.Clock()
         self.running = True
         print("ran")
+        return 1
 
-    def game_loop(self) -> None:
+    def game_loop(self) -> int:
         """
         Game loop without a game loop.
         """
@@ -55,9 +56,9 @@ class Game:
 
         # flip() the display to put your work on screen
         pygame.display.flip()
+        return 1
 
-    def get_false(self) -> bool:
+    def get_running_state(self) -> bool:
         return self.running
 
-print("helo")
-del pygame
+print("helo from python")
