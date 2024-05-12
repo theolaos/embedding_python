@@ -20,12 +20,12 @@ int main(int argc, char *argv[]){
 
     Py_Initialize();
 
-    PyObject* module = PyImport_ImportModule("resources.simple");
+    PyObject* game_module = PyImport_ImportModule("resources.simple");
 
 
-    if (module != NULL) {
+    if (game_module != NULL) {
         // Assuming your Game class is defined in your Python module
-        PyObject* game_class = PyObject_GetAttrString(module, "Game");
+        PyObject* game_class = PyObject_GetAttrString(game_module, "Game");
 
         if (game_class && PyCallable_Check(game_class)) {
             // Create an instance of the Game class
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 
                     // Check if the game is still running
                     PyObject* running_state = PyObject_CallMethod(game_instance, "get_running_state", NULL);
-                    bool running = (bool*)PyObject_IsTrue(running_state);
+                    bool running = PyObject_IsTrue(running_state);
 
                     // Clean up
                     Py_DECREF(running_state);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
             Py_DECREF(game_class);
         }
 
-        Py_DECREF(module);
+        Py_DECREF(game_module);
     }
 
     PyMem_RawFree(program);
